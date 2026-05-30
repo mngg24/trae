@@ -1,0 +1,8 @@
+from enum import StrEnum
+
+
+class PipelineStage(StrEnum):
+    GENERATE_BLUEPRINT = "GENERATE_BLUEPRINT"
+    GENERATE_ASSETS = "GENERATE_ASSETS"
+    RENDER_ASSEMBLE = "RENDER_ASSEMBLE"
+

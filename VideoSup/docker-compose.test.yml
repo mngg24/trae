@@ -1,0 +1,8 @@
+services:
+  minio:
+    tmpfs:
+      - /data
+
+  worker:
+    environment:
+      VIDEOSUP_UPLOAD_MODE: async

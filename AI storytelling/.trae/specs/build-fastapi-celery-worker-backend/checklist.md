@@ -1,0 +1,7 @@
+- [x] FastAPI API exposes project + blueprint + pipeline endpoints with OpenAPI schemas.
+- [x] Blueprint JSON is validated server-side and matches the plan.md conceptual schema shape.
+- [x] Project state machine is explicit, persisted, and rejects invalid transitions.
+- [x] Celery + Redis executes stage tasks asynchronously; API returns immediately after enqueue.
+- [x] Mock providers enable an end-to-end run without external API keys.
+- [x] Failures and retries transition projects/runs to FAILED with a durable reason.
+- [x] Tests cover schema validation, state transitions, and at least one end-to-end mock run path.

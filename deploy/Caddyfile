@@ -1,0 +1,7 @@
+{$API_DOMAIN} {
+  reverse_proxy backend-api:8000
+}
+
+{$MEDIA_DOMAIN} {
+  reverse_proxy minio:9000
+}

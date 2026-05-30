@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main, staging]
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r worker/requirements.txt -r worker/requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check worker/videosup_worker worker/tests
+
+      - name: Black
+        run: black --check worker/videosup_worker worker/tests
+
+      - name: Bandit
+        run: bandit -r worker/videosup_worker -q
+
+      - name: Pip Audit
+        run: pip-audit -r worker/requirements.txt
+
+      - name: Docker compose tests
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from worker
+          docker compose -f docker-compose.yml -f docker-compose.test.yml down -v

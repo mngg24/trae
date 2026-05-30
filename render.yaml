@@ -1,0 +1,136 @@
+services:
+  - type: redis
+    name: ai-storytelling-redis
+    plan: starter
+    ipAllowList: []
+
+  - type: web
+    name: ai-storytelling-api
+    env: docker
+    dockerContext: .
+    dockerfilePath: backend/Dockerfile
+    healthCheckPath: /health
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: ai-storytelling-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: CORS_ALLOW_ORIGINS
+        sync: false
+      - key: PROVIDERS_MODE
+        value: mock
+      - key: PIXVERSE_API_KEY
+        sync: false
+      - key: PIXVERSE_MODEL
+        value: v6
+      - key: PIXVERSE_ASPECT_RATIO
+        value: 9:16
+      - key: PIXVERSE_QUALITY
+        value: 720p
+      - key: PIXVERSE_DURATION_SEC
+        value: "5"
+      - key: VIDEOSUP_BASE_URL
+        fromService:
+          name: ai-storytelling-videosup
+          type: web
+          property: url
+      - key: VIDEOSUP_POLL_INTERVAL_SEC
+        value: "2"
+      - key: VIDEOSUP_MAX_POLL_SEC
+        value: "600"
+
+  - type: worker
+    name: ai-storytelling-worker
+    env: docker
+    dockerContext: .
+    dockerfilePath: backend/Dockerfile
+    plan: starter
+    autoDeploy: true
+    startCommand: celery -A worker.celery_app.celery_app worker --loglevel=INFO
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: ai-storytelling-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: ai-storytelling-redis
+          type: redis
+          property: connectionString
+      - key: PROVIDERS_MODE
+        value: mock
+      - key: PIXVERSE_API_KEY
+        sync: false
+      - key: PIXVERSE_MODEL
+        value: v6
+      - key: PIXVERSE_ASPECT_RATIO
+        value: 9:16
+      - key: PIXVERSE_QUALITY
+        value: 720p
+      - key: PIXVERSE_DURATION_SEC
+        value: "5"
+      - key: VIDEOSUP_BASE_URL
+        fromService:
+          name: ai-storytelling-videosup
+          type: web
+          property: url
+      - key: VIDEOSUP_POLL_INTERVAL_SEC
+        value: "2"
+      - key: VIDEOSUP_MAX_POLL_SEC
+        value: "600"
+
+  - type: web
+    name: ai-storytelling-videosup
+    env: docker
+    dockerContext: .
+    dockerfilePath: VideoSup/worker/Dockerfile
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: VIDEOSUP_STORAGE_BACKEND
+        value: s3
+      - key: VIDEOSUP_S3_ENDPOINT_URL
+        sync: false
+      - key: VIDEOSUP_S3_PUBLIC_BASE_URL
+        sync: false
+      - key: VIDEOSUP_S3_BUCKET
+        sync: false
+      - key: VIDEOSUP_S3_PREFIX
+        value: videosup
+      - key: VIDEOSUP_S3_ACCESS_KEY_ID
+        sync: false
+      - key: VIDEOSUP_S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: VIDEOSUP_UPLOAD_MODE
+        value: sync
+
+databases:
+  - name: ai-storytelling-postgres
+    plan: starter
